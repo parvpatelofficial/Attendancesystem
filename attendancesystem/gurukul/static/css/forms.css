@@ -1,0 +1,30 @@
+/* Forms Styles */
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.form-label i {
+    color: #007bff;
+    margin-right: 5px;
+}
+
+
+/* Validation */
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+    border-color: #dc3545;
+}
+
+.form-control.is-valid,
+.form-select.is-valid {
+    border-color: #28a745;
+}
+
+.invalid-feedback {
+    display: block;
+    color: #dc3545;
+}

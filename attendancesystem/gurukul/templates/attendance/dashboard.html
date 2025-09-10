@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Gurukul Attendance{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-tachometer-alt me-2"></i>
+            Dashboard
+            <small class="text-muted">{{ today|date:"F d, Y" }}</small>
+        </h1>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Total Classes</h5>
+                        <h2>{{ total_standards }}</h2>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-school fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Total Students</h5>
+                        <h2>{{ total_students }}</h2>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Present Today</h5>
+                        <h2>
+                            {% for summary in attendance_summary %}
+                                {{ summary.present_today|add:0 }}
+                                {% if not forloop.last %}+{% endif %}
+                            {% empty %}0{% endfor %}
+                        </h2>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-white bg-warning">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Absent Today</h5>
+                        <h2>
+                            {% for summary in attendance_summary %}
+                                {{ summary.absent_today|add:0 }}
+                                {% if not forloop.last %}+{% endif %}
+                            {% empty %}0{% endfor %}
+                        </h2>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-times-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Class-wise Attendance Summary -->
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Class-wise Attendance Summary
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if attendance_summary %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Class</th>
+                                <th>Total Students</th>
+                                <th>Present</th>
+                                <th>Absent</th>
+                                <th>Percentage</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for summary in attendance_summary %}
+                            <tr>
+                                <td><strong>{{ summary.standard }}</strong></td>
+                                <td>{{ summary.total_students }}</td>
+                                <td><span class="badge bg-success">{{ summary.present_today }}</span></td>
+                                <td><span class="badge bg-danger">{{ summary.absent_today }}</span></td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar" role="progressbar" 
+                                             style="width: {{ summary.percentage }}%">
+                                            {{ summary.percentage }}%
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="{% url 'take_attendance_standard' summary.standard.id %}" 
+                                       class="btn btn-sm btn-primary">
+                                        <i class="fas fa-edit me-1"></i>Take Attendance
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No classes found. Please add some classes first.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-bolt me-2"></i>
+                    Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'take_attendance' %}" class="btn btn-primary">
+                        <i class="fas fa-clipboard-check me-1"></i>
+                        Take Attendance
+                    </a>
+                    <a href="{% url 'add_student' %}" class="btn btn-success">
+                        <i class="fas fa-user-plus me-1"></i>
+                        Add Student
+                    </a>
+                    <a href="{% url 'view_attendance' %}" class="btn btn-info">
+                        <i class="fas fa-chart-line me-1"></i>
+                        View Reports
+                    </a>
+                    <a href="{% url 'manage_students' %}" class="btn btn-warning">
+                        <i class="fas fa-cogs me-1"></i>
+                        Manage Students
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

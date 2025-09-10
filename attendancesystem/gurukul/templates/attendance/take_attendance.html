@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+
+{% block title %}Take Attendance - Gurukul{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-clipboard-check me-2"></i>
+            Take Attendance
+            <small class="text-muted">{{ today|date:"F d, Y" }}</small>
+        </h1>
+    </div>
+</div>
+
+<!-- Class Selection -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Select Class</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for standard in standards %}
+                    <div class="col-md-3 mb-2">
+                        <a href="{% url 'take_attendance_standard' standard.id %}" 
+                           class="btn {% if selected_standard.id == standard.id %}btn-primary{% else %}btn-outline-primary{% endif %} w-100">
+                            <i class="fas fa-chalkboard me-1"></i>
+                            {{ standard }}
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if selected_standard %}
+<!-- Attendance Form -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-users me-2"></i>
+                    {{ selected_standard }} - Attendance
+                </h5>
+                <div>
+                    <button type="button" class="btn btn-success btn-sm" onclick="markAllPresent()">
+                        <i class="fas fa-check-double me-1"></i>All Present
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="markAllAbsent()">
+                        <i class="fas fa-times me-1"></i>All Absent
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if students %}
+                <form method="post" id="attendanceForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="attendance_data" id="attendanceData">
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 15%;">Roll No.</th>
+                                    <th style="width: 35%;">Student Name</th>
+                                    <th style="width: 20%;">Status</th>
+                                    <th style="width: 30%;">Quick Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in students %}
+                                <tr>
+                                    <td><strong>{{ student.roll_number }}</strong></td>
+                                    <td>{{ student.full_name }}</td>
+                                    <td>
+                                        <select class="form-select attendance-select" 
+                                                data-student-id="{{ student.id }}"
+                                                id="student_{{ student.id }}">
+                                            <option value="absent" {% if student.current_status == 'absent' %}selected{% endif %}>
+                                                Absent
+                                            </option>
+                                            <option value="present" {% if student.current_status == 'present' %}selected{% endif %}>
+                                                Present
+                                            </option>
+                                            <option value="late" {% if student.current_status == 'late' %}selected{% endif %}>
+                                                Late
+                                            </option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <button type="button" class="btn btn-success" 
+                                                    onclick="setStatus({{ student.id }}, 'present')">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-danger" 
+                                                    onclick="setStatus({{ student.id }}, 'absent')">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-warning" 
+                                                    onclick="setStatus({{ student.id }}, 'late')">
+                                                <i class="fas fa-clock"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i>
+                            Save Attendance
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-lg ms-2">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Back to Dashboard
+                        </a>
+                    </div>
+                </form>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No students found in this class</h5>
+                    <p class="text-muted">Please add students to this class first.</p>
+                    <a href="{% url 'add_student' %}" class="btn btn-primary">
+                        <i class="fas fa-user-plus me-1"></i>Add Student
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+function setStatus(studentId, status) {
+    const select = document.getElementById('student_' + studentId);
+    if (select) {
+        select.value = status;
+        updateRowHighlight(select);
+    }
+}
+
+function markAllPresent() {
+    const selects = document.querySelectorAll('.attendance-select');
+    selects.forEach(select => {
+        select.value = 'present';
+        updateRowHighlight(select);
+    });
+}
+
+function markAllAbsent() {
+    const selects = document.querySelectorAll('.attendance-select');
+    selects.forEach(select => {
+        select.value = 'absent';
+        updateRowHighlight(select);
+    });
+}
+
+function updateRowHighlight(select) {
+    const row = select.closest('tr');
+    const status = select.value;
+    
+    row.classList.remove('table-success', 'table-danger', 'table-warning');
+    
+    switch(status) {
+        case 'present':
+            row.classList.add('table-success');
+            break;
+        case 'absent':
+            row.classList.add('table-danger');
+            break;
+        case 'late':
+            row.classList.add('table-warning');
+            break;
+    }
+}
+
+document.getElementById('attendanceForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    
+    const selects = document.querySelectorAll('.attendance-select');
+    const attendanceData = {};
+    
+    selects.forEach(select => {
+        const studentId = select.getAttribute('data-student-id');
+        attendanceData[studentId] = select.value;
+    });
+    
+    document.getElementById('attendanceData').value = JSON.stringify(attendanceData);
+    this.submit();
+});
+
+// Initialize row highlighting
+document.querySelectorAll('.attendance-select').forEach(select => {
+    updateRowHighlight(select);
+    select.addEventListener('change', function() {
+        updateRowHighlight(this);
+    });
+});
+</script>
+{% endblock %}

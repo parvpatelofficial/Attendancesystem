@@ -1,0 +1,38 @@
+/* Dashboard Styles */
+
+.summary-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    transition: transform 0.3s ease;
+}
+
+.summary-card:hover {
+    transform: scale(1.05);
+}
+
+.summary-card h2 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+
+/* Progress Bars */
+
+.progress-bar {
+    border-radius: 10px;
+    transition: width 0.6s ease;
+}
+
+
+/* Quick Actions */
+
+.quick-actions .btn {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    border-radius: 10px;
+}

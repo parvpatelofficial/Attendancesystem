@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirm Delete{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="card mx-auto" style="max-width: 500px;">
+    <div class="card-header bg-danger text-white">
+      <h5 class="mb-0">Confirm Delete</h5>
+    </div>
+    <div class="card-body">
+      <p>Are you sure you want to remove <strong>{{ student.full_name }}</strong> from the system?</p>
+      <p class="text-muted small">This action will mark the student as inactive but will not delete their attendance history.</p>
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, Remove Student</button>
+        <a href="{% url 'manage_students' %}" class="btn btn-secondary ms-2">Cancel</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
